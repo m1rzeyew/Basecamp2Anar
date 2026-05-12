@@ -1,0 +1,65 @@
+﻿@model RegisterVM
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Dashboard</title>
+  
+    <script src="https://unpkg.com/@@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="~/assets/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <a asp-controller="dashboard" asp-action="index" style="text-decoration: none; color: inherit;">DASHBOARD</a>
+        </div>
+        
+    </header>
+
+    <main class="auth-container">
+        <div class="auth-card">
+            <h2 class="auth-title">Create an account</h2>
+            <form method="POST">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label class="form-label" for="fullname">Full Name</label>
+                    <input asp-for="FullName" id="fullname" class="form-control" placeholder="Jane Doe" required>
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="UserName">User Name</label>
+                    <input asp-for="Username" id="UserName" class="form-control" placeholder="Jane44" required>
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email address</label>
+                    <input asp-for="Email" id="email" class="form-control" placeholder="name@company.com" required>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input asp-for="Password" id="password" class="form-control" placeholder="••••••••" required>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="confirm_password">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" id="confirm_password" class="form-control" placeholder="••••••••" required>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" asp-action="register">Sign Up</button>
+            </form>
+            <div class="auth-footer">
+                Already have an account? <a asp-controller="account" asp-action="login">Log in</a>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
