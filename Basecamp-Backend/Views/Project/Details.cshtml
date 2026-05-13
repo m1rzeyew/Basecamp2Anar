@@ -229,6 +229,7 @@
         function sendDiscussion(projectId) {
             const input = document.getElementById('discussionInput');
             const content = input.value.trim();
+            const isAdmin = @isAdmin.ToString().ToLower();
 
             if (!content) return;
 
@@ -245,6 +246,11 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    const deleteButton = isAdmin ? `
+                        <button onclick="deleteDiscussion(${data.id})" style="background:none; border:none; cursor:pointer; color:#aaa; margin-left:0.5rem; align-self:flex-start;" title="Delete">
+                            <i class="ph ph-trash"></i>
+                        </button>` : '';
+
                     const html = `
                     <div class="message-item" id="msg-${data.id}">
                         <div class="avatar"><i class="ph ph-user"></i></div>
@@ -255,9 +261,7 @@
                             </div>
                             <p class="message-text">${data.content}</p>
                         </div>
-                        <button onclick="deleteDiscussion(${data.id})" style="background:none; border:none; cursor:pointer; color:#aaa; margin-left:0.5rem; align-self:flex-start;" title="Delete">
-                            <i class="ph ph-trash"></i>
-                        </button>
+                        ${deleteButton}
                     </div>`;
 
                     document.getElementById('messageList').insertAdjacentHTML('afterbegin', html);
