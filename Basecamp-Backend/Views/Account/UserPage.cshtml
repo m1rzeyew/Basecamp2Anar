@@ -1,4 +1,4 @@
-﻿@model AppUser
+@model AppUser
 @{
     Layout = null;
 }
@@ -9,29 +9,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile | Dashboard</title>
-
     <script src="https://unpkg.com/@@phosphor-icons/web"></script>
     <link rel="stylesheet" href="~/assets/css/style.css">
 </head>
 
 <body>
-
-    <!-- Header -->
     <header class="header">
         <div class="header-logo">
-            <a href="index.html"
-                   style="text-decoration: none; color: var(--blue-primary); font-weight: 700; font-size: 0.95rem;">
+            <a asp-controller="Dashboard" asp-action="Index" style="text-decoration: none; color: var(--blue-primary); font-weight: 700; font-size: 0.95rem;">
                 <i class="ph ph-arrow-left"></i> Back to Dashboard
             </a>
         </div>
-    </hea   der>
+    </header>
 
     <main class="auth-container">
-        <div class="auth-card" style="max-width: 500px;">
+        <div class="auth-card" style="max-width: 500px; margin: 0 auto;">
             <h2 class="auth-title">My Profile</h2>
 
-
-            <!-- Profile Form -->
             <form>
                 <div class="form-group">
                     <label class="form-label" for="fullname">Full Name</label>
@@ -49,7 +43,6 @@
                 </div>
             </form>
 
-            <!-- Danger Zone -->
             <div class="danger-zone">
                 <h3 class="danger-title">Danger Zone</h3>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
@@ -61,7 +54,6 @@
             </div>
         </div>
     </main>
-
 </body>
 
 </html>

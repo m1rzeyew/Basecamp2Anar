@@ -1,6 +1,8 @@
-﻿@model Project
+@model Project
 @{
     Layout = null;
+    var isAdmin = User.IsInRole("Admin");
+    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -8,39 +10,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Details | Dashboard</title>
-  
     <script src="https://unpkg.com/@@phosphor-icons/web"></script>
     <link rel="stylesheet" href="~/assets/css/style.css">
 </head>
 <body>
-
-    <!-- Header -->
     <header class="header">
         <div class="header-logo">
-            <a asp-controller="Dashboard" asp-action="index" style="text-decoration: none; color: var(--blue-primary); font-weight: 700; font-size: 0.95rem;">
+            <a asp-controller="Dashboard" asp-action="Index" style="text-decoration: none; color: var(--blue-primary); font-weight: 700; font-size: 0.95rem;">
                 <i class="ph ph-arrow-left"></i> Back to Dashboard
             </a>
         </div>
     </header>
 
     <main class="main-content">
-    
-        <!-- Top Section -->
         <div class="project-detail-header">
-            <h1 class="page-title">Website Redesign</h1>
-            <p class="project-detail-desc">Complete overhaul of the main corporate website, including new branding and improved user experience.</p>
+            <h1 class="page-title">@Model.Name</h1>
+            <p class="project-detail-desc">@Model.Description</p>
         </div>
 
         <div class="project-layout">
-      
-            <!-- Sidebar (Left) -->
             <aside class="sidebar-card">
                 <ul class="sidebar-menu">
-                    <li class="sidebar-item">
-                        <a asp-action="ManageProject" asp-route-id="@Model.Id" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; width: 100%;">
-                            <i class="ph ph-gear"></i> Manage Project
-                        </a>
-                    </li>
+                    @if (isAdmin)
+                    {
+                        <li class="sidebar-item">
+                            <a asp-action="ManageProject" asp-route-id="@Model.Id" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; width: 100%;">
+                                <i class="ph ph-gear"></i> Manage Project
+                            </a>
+                        </li>
+                    }
                     <li class="sidebar-item active" data-target="discussions">
                         <i class="ph ph-chat-circle-dots"></i> Discussions
                     </li>
@@ -56,22 +54,17 @@
                 </ul>
             </aside>
 
-            <!-- Main Content (Right) -->
             <section class="main-display">
-        
-                <!-- Discussions Section -->
                 <div id="discussions" class="content-section content-card active">
                     <h2 class="section-title"><i class="ph ph-chat-circle"></i> Discussions</h2>
 
-                    <!-- Mesaj yazma sahəsi -->
                     <div class="input-group" style="display:flex; gap: 0.75rem; margin-bottom: 1.5rem;">
-                        <input type="text" id="discussionInput" class="form-control"
-                               placeholder="Type a message..."
-                               onkeypress="if(event.key==='Enter') sendDiscussion(@Model.Id)">
+                        <input type="text" id="discussionInput" class="form-control" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendDiscussion(@Model.Id)">
                         <button class="btn btn-primary" onclick="sendDiscussion(@Model.Id)">Send</button>
                     </div>
 
-                    <!-- Mesaj siyahısı -->
+                    <div id="discussionError" style="display:none; color: var(--red-primary); margin-bottom: 1rem;"></div>
+
                     <div class="message-list" id="messageList">
                         @if (Model.Discussions != null)
                         {
@@ -86,13 +79,9 @@
                                         </div>
                                         <p class="message-text">@d.Content</p>
                                     </div>
-                                    @* Yalnız öz mesajını silə bilər *@
-                                    @if (d.AppUserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                    @if (isAdmin || d.AppUserId == userId)
                                     {
-                                        <button onclick="deleteDiscussion(@d.Id)"
-                                                style="background:none; border:none; cursor:pointer;
-                                            color:#aaa; margin-left:0.5rem; align-self:flex-start;"
-                                                title="Sil">
+                                        <button onclick="deleteDiscussion(@d.Id)" style="background:none; border:none; cursor:pointer; color:#aaa; margin-left:0.5rem; align-self:flex-start;" title="Delete">
                                             <i class="ph ph-trash"></i>
                                         </button>
                                     }
@@ -102,43 +91,57 @@
                     </div>
                 </div>
 
-                <!-- Tasks Section -->
-                <div id="tasks" class="content-section content-card active">
+                <div id="tasks" class="content-section content-card">
                     <h2 class="section-title"><i class="ph ph-check-square"></i> Tasks</h2>
-    
-                    <div class="add-task-container">
-                        <input type="text" id="taskInput" placeholder="Add a new task..." class="task-input">
-                        <button class="btn btn-primary" onclick="addNewTask(@Model.Id)">Add Task</button>
-                    </div>
+
+                    @if (isAdmin)
+                    {
+                        <div class="add-task-container">
+                            <input type="text" id="taskInput" placeholder="Add a new task..." class="task-input">
+                            <button class="btn btn-primary" onclick="addNewTask(@Model.Id)">Add Task</button>
+                        </div>
+                    }
 
                     <div class="task-list" id="taskList">
                         @if (Model.Tasks != null)
                         {
                             @foreach (var task in Model.Tasks.OrderByDescending(t => t.Id))
                             {
-                                <div class="task-item @(task.IsCompleted ? "completed" : "")" id="task-@task.Id">
-                                    <button type="button" class="custom-checkbox" onclick="toggleTask(event, @task.Id)">
-                                        @if (task.IsCompleted)
-                                        {
-                                            <i class="ph ph-check-bold"></i>
-                                        }
-                                    </button>
-                                    <span class="task-text" onclick="toggleTask(event, @task.Id)">@task.Title</span>
-                                    <div class="btn-delete-task" onclick="deleteTask(@task.Id)">
-                                        <i class="ph ph-trash"></i>
+                                if (isAdmin)
+                                {
+                                    <div class="task-item @(task.IsCompleted ? "completed" : "")" id="task-@task.Id">
+                                        <button type="button" class="custom-checkbox" onclick="toggleTask(event, @task.Id)">
+                                            @if (task.IsCompleted)
+                                            {
+                                                <i class="ph ph-check-bold"></i>
+                                            }
+                                        </button>
+                                        <span class="task-text" onclick="toggleTask(event, @task.Id)">@task.Title</span>
+                                        <div class="btn-delete-task" onclick="deleteTask(event, @task.Id)">
+                                            <i class="ph ph-trash"></i>
+                                        </div>
                                     </div>
-                                </div>
+                                }
+                                else
+                                {
+                                    <div style="display:flex; align-items:center; gap:1rem; padding:0.75rem; border-bottom:1px solid var(--border-color);">
+                                        <span class="custom-checkbox">
+                                            @if (task.IsCompleted)
+                                            {
+                                                <i class="ph ph-check-bold"></i>
+                                            }
+                                        </span>
+                                        <span>@task.Title</span>
+                                    </div>
+                                }
                             }
                         }
                     </div>
                 </div>
 
-                
-                <!-- Members Section -->
                 <div id="members" class="content-section content-card">
                     <h2 class="section-title"><i class="ph ph-users-three"></i> Project Members</h2>
                     <div class="member-list">
-
                         @foreach (var member in Model.Members)
                         {
                             <div class="member-item">
@@ -149,301 +152,321 @@
                                 <span class="badge-pill badge-owner">@member.Role</span>
                             </div>
                         }
-
                     </div>
                 </div>
 
-                <!-- Attachments Section -->
                 <div id="attachments" class="content-section content-card">
                     <h2 class="section-title"><i class="ph ph-paperclip"></i> Attachments</h2>
 
-                    <!-- Upload area -->
-                    <div class="file-upload-area" onclick="document.getElementById('fileInput').click()"
-                         style="cursor:pointer;">
-                        <i class="ph ph-cloud-arrow-up" style="font-size: 2.5rem; color: var(--blue-primary); margin-bottom: 1rem; display: block;"></i>
-                        <p style="font-weight: 600; margin-bottom: 0.5rem;">Click to choose file</p>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary);">PDF, PNG, JPG, DOCX — Max 50MB</p>
-                        <input type="file" id="fileInput" style="display: none;"
-                               onchange="uploadAttachment(@Model.Id, this)">
-                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="file-upload-area" onclick="document.getElementById('fileInput').click()" style="cursor:pointer;">
+                            <i class="ph ph-cloud-arrow-up" style="font-size: 2.5rem; color: var(--blue-primary); margin-bottom: 1rem; display: block;"></i>
+                            <p style="font-weight: 600; margin-bottom: 0.5rem;">Click to choose file</p>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">PDF, PNG, JPG, DOCX, XLSX</p>
+                            <input type="file" id="fileInput" style="display: none;" onchange="uploadAttachment(@Model.Id, this)">
+                        </div>
+                    }
 
-                    <!-- Upload progress (gizli başlayır) -->
                     <div id="uploadStatus" style="display:none; margin-top:1rem; color: var(--blue-primary); font-size:0.9rem;">
-                        <i class="ph ph-spinner"></i> Yüklənir...
+                        <i class="ph ph-spinner"></i> Uploading...
                     </div>
 
-                    <!-- Fayl siyahısı -->
+                    <div id="attachmentError" style="display:none; margin-top:1rem; color: var(--red-primary); font-size:0.9rem;"></div>
+
                     <div class="attachment-list" id="attachmentList" style="margin-top: 1.5rem;">
                         @if (Model.Attachments != null)
                         {
                             @foreach (var att in Model.Attachments.OrderByDescending(a => a.Id))
                             {
-                                <div class="attachment-item" id="att-@att.Id"
-                                     style="display:flex; align-items:center; justify-content:space-between;
-                                    padding: 0.75rem 1rem; border: 1px solid var(--border-color);
-                                    border-radius: 8px; margin-bottom: 0.5rem;">
+                                var icon = att.FileType switch
+                                {
+                                    ".pdf" => "ph-file-pdf",
+                                    ".png" or ".jpg" or ".jpeg" or ".gif" => "ph-image",
+                                    ".doc" or ".docx" => "ph-file-doc",
+                                    ".xls" or ".xlsx" => "ph-file-xls",
+                                    _ => "ph-file"
+                                };
+
+                                <div class="attachment-item" id="att-@att.Id" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem;">
                                     <div style="display:flex; align-items:center; gap: 0.75rem;">
-                                        @{
-                                            var icon = att.FileType switch
-                                            {
-                                                ".pdf" => "ph-file-pdf",
-                                                ".png" or ".jpg" or ".jpeg" or ".gif" => "ph-image",
-                                                ".doc" or ".docx" => "ph-file-doc",
-                                                ".xls" or ".xlsx" => "ph-file-xls",
-                                                _ => "ph-file"
-                                            };
-                                        }
                                         <i class="ph @icon" style="font-size:1.5rem; color: var(--blue-primary);"></i>
-                                        <a href="@att.FilePath" target="_blank"
-                                               style="text-decoration:none; color: inherit; font-weight:500;">
-                                            @att.FileName
-                                        </a>
+                                        <div>
+                                            <div style="font-weight:600;">@att.FileName</div>
+                                            <div style="display:flex; gap:0.75rem; margin-top:0.25rem;">
+                                                <a asp-controller="Project" asp-action="OpenAttachment" asp-route-id="@att.Id" target="_blank" style="text-decoration:none; color: var(--blue-primary); font-weight:500;">Open</a>
+                                                <a asp-controller="Project" asp-action="DownloadAttachment" asp-route-id="@att.Id" style="text-decoration:none; color: var(--blue-primary); font-weight:500;">Download</a>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <button onclick="deleteAttachment(@att.Id)"
-                                            style="background:none; border:none; cursor:pointer; color:#e74c3c;">
-                                        <i class="ph ph-trash"></i>
-                                    </button>
+                                    @if (isAdmin)
+                                    {
+                                        <button onclick="deleteAttachment(@att.Id)" style="background:none; border:none; cursor:pointer; color:#e74c3c;">
+                                            <i class="ph ph-trash"></i>
+                                        </button>
+                                    }
                                 </div>
                             }
                         }
                     </div>
                 </div>
-
             </section>
         </div>
     </main>
 
     <script>
-        // 1. Yeni Task Əlavə Etmək
-        function addNewTask(projectId) {
-        const input = document.getElementById('taskInput');
-        const title = input.value.trim();
-
-        if (!title) return;
-
-        const formData = new FormData();
-        formData.append('projectId', projectId);
-        formData.append('title', title);
-
-        fetch('/Project/AddTask', {
-        method: 'POST',
-        body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-        if (data.success) {
-        const taskList = document.getElementById('taskList');
-        const html = `
-        <div class="task-item" id="task-${data.id}">
-        <div class="custom-checkbox" onclick="toggleTask(event, ${data.id})"></div>
-        <span class="task-text" onclick="toggleTask(event, ${data.id})">${data.title}</span>
-
-        <div class="btn-delete-task" title="Delete Task" onclick="deleteTask(${data.id})">
-        <i class="ph ph-x"></i>
-        </div>
-        </div>`;
-        taskList.insertAdjacentHTML('afterbegin', html);
-        input.value = ''; // İnputu təmizlə
-        }
-        });
+        function showMessage(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
         }
 
-        // 2. Statusu Dəyişmək (Check/Uncheck)
-        function toggleTask(event, taskId) {
-        // Səhifənin yenilənməsini və klikin digər elementlərə keçməsini dayandırırıq
-        if (event) {
-        event.preventDefault();
-        event.stopPropagation();
+        function hideMessage(elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = '';
+            element.style.display = 'none';
         }
 
-        const formData = new FormData();
-        formData.append('taskId', taskId);
-
-        fetch('/Project/ToggleTask', {
-        method: 'POST',
-        body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-        if (data.success) {
-        const taskElement = document.getElementById(`task-${taskId}`);
-        const checkbox = taskElement.querySelector('.custom-checkbox');
-            
-        // Vizual olaraq dəyişikliyi tətbiq edirik
-        taskElement.classList.toggle('completed');
-        checkbox.innerHTML = data.isCompleted ? '<i class="ph ph-check-bold"></i>' : '';
-        } else {
-        alert("Xəta baş verdi!");
-        }
-        })
-        .catch(err => console.error("Error:", err));
-        }
-
-        // 3. Taskı Silmək
-        function deleteTask(taskId) {
-        if (!confirm("Bu tapşırığı silmək istəyirsiniz?")) return;
-
-        const formData = new FormData();
-        formData.append('taskId', taskId);
-
-        fetch('/Project/DeleteTask', {
-        method: 'POST',
-        body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-        if (data.success) {
-        document.getElementById(`task-${taskId}`).remove();
-        }
-        });
-        }
-
-        // Enter düyməsi ilə task əlavə etmək üçün
-        document.getElementById('taskInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-        addNewTask(@Model.Id);
-        }
-        });
-
-        // Fayl yükləmək
-        function uploadAttachment(projectId, input) {
-        const file = input.files[0];
-        if (!file) return;
-
-        const status = document.getElementById('uploadStatus');
-        status.style.display = 'block';
-
-        const formData = new FormData();
-        formData.append('projectId', projectId);
-        formData.append('file', file);
-
-        fetch('/Project/UploadAttachment', {
-        method: 'POST',
-        body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-        status.style.display = 'none';
-        if (data.success) {
-        const icons = {
-        '.pdf': 'ph-file-pdf',
-        '.png': 'ph-image', '.jpg': 'ph-image', '.jpeg': 'ph-image',
-        '.doc': 'ph-file-doc', '.docx': 'ph-file-doc',
-        '.xls': 'ph-file-xls', '.xlsx': 'ph-file-xls'
-        };
-        const icon = icons[data.fileType] || 'ph-file';
-
-        const html = `
-        <div class="attachment-item" id="att-${data.id}"
-        style="display:flex; align-items:center; justify-content:space-between;
-        padding: 0.75rem 1rem; border: 1px solid var(--border-color);
-        border-radius: 8px; margin-bottom: 0.5rem;">
-        <div style="display:flex; align-items:center; gap: 0.75rem;">
-        <i class="ph ${icon}" style="font-size:1.5rem; color: var(--blue-primary);"></i>
-        <a href="${data.filePath}" target="_blank"
-        style="text-decoration:none; color: inherit; font-weight:500;">
-        ${data.fileName}
-        </a>
-        </div>
-        <button onclick="deleteAttachment(${data.id})"
-        style="background:none; border:none; cursor:pointer; color:#e74c3c;">
-        <i class="ph ph-trash"></i>
-        </button>
-        </div>`;
-
-        document.getElementById('attachmentList').insertAdjacentHTML('afterbegin', html);
-        input.value = ''; // input-u sıfırla ki eyni faylı yenidən seçmək olsun
-        } else {
-        alert('Xəta: ' + data.message);
-        }
-        })
-        .catch(err => {
-        status.style.display = 'none';
-        console.error('Upload error:', err);
-        });
-        }
-
-        // Fayl silmək
-        function deleteAttachment(attachmentId) {
-        if (!confirm('Bu faylı silmək istəyirsiniz?')) return;
-
-        const formData = new FormData();
-        formData.append('attachmentId', attachmentId);
-
-        fetch('/Project/DeleteAttachment', {
-        method: 'POST',
-        body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-        if (data.success) {
-        document.getElementById(`att-${attachmentId}`).remove();
-        }
-        });
-        }
-
-        // Mesaj göndərmək
         function sendDiscussion(projectId) {
-        const input = document.getElementById('discussionInput');
-        const content = input.value.trim();
-        if (!content) return;
+            const input = document.getElementById('discussionInput');
+            const content = input.value.trim();
 
-        const formData = new FormData();
-        formData.append('projectId', projectId);
-        formData.append('content', content);
+            if (!content) return;
 
-        fetch('/Project/AddDiscussion', {
-        method: 'POST',
-        body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-        if (data.success) {
-        const html = `
-        <div class="message-item" id="msg-${data.id}">
-        <div class="avatar"><i class="ph ph-user"></i></div>
-        <div class="message-content" style="flex:1;">
-        <div class="message-header">
-        <span class="user-name">${data.fullName}</span>
-        <span class="timestamp">${data.createdAt}</span>
-        </div>
-        <p class="message-text">${data.content}</p>
-        </div>
-        <button onclick="deleteDiscussion(${data.id})"
-        style="background:none; border:none; cursor:pointer;
-        color:#aaa; margin-left:0.5rem; align-self:flex-start;"
-        title="Sil">
-        <i class="ph ph-trash"></i>
-        </button>
-        </div>`;
+            hideMessage('discussionError');
 
-        document.getElementById('messageList').insertAdjacentHTML('afterbegin', html);
-        input.value = '';
+            const formData = new FormData();
+            formData.append('projectId', projectId);
+            formData.append('content', content);
+
+            fetch('/Project/AddDiscussion', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const html = `
+                    <div class="message-item" id="msg-${data.id}">
+                        <div class="avatar"><i class="ph ph-user"></i></div>
+                        <div class="message-content" style="flex:1;">
+                            <div class="message-header">
+                                <span class="user-name">${data.fullName}</span>
+                                <span class="timestamp">${data.createdAt}</span>
+                            </div>
+                            <p class="message-text">${data.content}</p>
+                        </div>
+                        <button onclick="deleteDiscussion(${data.id})" style="background:none; border:none; cursor:pointer; color:#aaa; margin-left:0.5rem; align-self:flex-start;" title="Delete">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                    </div>`;
+
+                    document.getElementById('messageList').insertAdjacentHTML('afterbegin', html);
+                    input.value = '';
+                } else {
+                    showMessage('discussionError', data.message || 'Could not send message.');
+                }
+            });
         }
-        })
-        .catch(err => console.error('Error:', err));
-        }
 
-        // Mesaj silmək
         function deleteDiscussion(discussionId) {
-        if (!confirm('Bu mesajı silmək istəyirsiniz?')) return;
+            if (!confirm('Are you sure you want to delete this message?')) return;
 
-        const formData = new FormData();
-        formData.append('discussionId', discussionId);
+            const formData = new FormData();
+            formData.append('discussionId', discussionId);
 
-        fetch('/Project/DeleteDiscussion', {
-        method: 'POST',
-        body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-        if (data.success) {
-        document.getElementById(`msg-${discussionId}`).remove();
+            fetch('/Project/DeleteDiscussion', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`msg-${discussionId}`).remove();
+                } else {
+                    showMessage('discussionError', data.message || 'Could not delete message.');
+                }
+            });
         }
-        });
+
+        @if (isAdmin)
+        {
+            <text>
+            function addNewTask(projectId) {
+                const input = document.getElementById('taskInput');
+                const title = input.value.trim();
+
+                if (!title) return;
+
+                const formData = new FormData();
+                formData.append('projectId', projectId);
+                formData.append('title', title);
+
+                fetch('/Project/AddTask', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const html = `
+                        <div class="task-item" id="task-${data.id}">
+                            <button type="button" class="custom-checkbox" onclick="toggleTask(event, ${data.id})"></button>
+                            <span class="task-text" onclick="toggleTask(event, ${data.id})">${data.title}</span>
+                            <div class="btn-delete-task" onclick="deleteTask(event, ${data.id})">
+                                <i class="ph ph-trash"></i>
+                            </div>
+                        </div>`;
+
+                        document.getElementById('taskList').insertAdjacentHTML('afterbegin', html);
+                        input.value = '';
+                    }
+                });
+            }
+
+            function toggleTask(event, taskId) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                const formData = new FormData();
+                formData.append('taskId', taskId);
+
+                fetch('/Project/ToggleTask', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const taskElement = document.getElementById(`task-${taskId}`);
+                        const checkbox = taskElement.querySelector('.custom-checkbox');
+                        taskElement.classList.toggle('completed');
+                        checkbox.innerHTML = data.isCompleted ? '<i class="ph ph-check-bold"></i>' : '';
+                    }
+                });
+            }
+
+            function deleteTask(event, taskId) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                if (!confirm('Are you sure you want to delete this task?')) return;
+
+                const formData = new FormData();
+                formData.append('taskId', taskId);
+
+                fetch('/Project/DeleteTask', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`task-${taskId}`).remove();
+                    }
+                });
+            }
+
+            const taskInput = document.getElementById('taskInput');
+            if (taskInput) {
+                taskInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        addNewTask(@Model.Id);
+                    }
+                });
+            }
+
+            function uploadAttachment(projectId, input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                hideMessage('attachmentError');
+
+                const status = document.getElementById('uploadStatus');
+                status.style.display = 'block';
+
+                const formData = new FormData();
+                formData.append('projectId', projectId);
+                formData.append('file', file);
+
+                fetch('/Project/UploadAttachment', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    status.style.display = 'none';
+
+                    if (data.success) {
+                        const icons = {
+                            '.pdf': 'ph-file-pdf',
+                            '.png': 'ph-image',
+                            '.jpg': 'ph-image',
+                            '.jpeg': 'ph-image',
+                            '.gif': 'ph-image',
+                            '.doc': 'ph-file-doc',
+                            '.docx': 'ph-file-doc',
+                            '.xls': 'ph-file-xls',
+                            '.xlsx': 'ph-file-xls'
+                        };
+
+                        const icon = icons[data.fileType] || 'ph-file';
+
+                        const html = `
+                        <div class="attachment-item" id="att-${data.id}" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem;">
+                            <div style="display:flex; align-items:center; gap: 0.75rem;">
+                                <i class="ph ${icon}" style="font-size:1.5rem; color: var(--blue-primary);"></i>
+                                <div>
+                                    <div style="font-weight:600;">${data.fileName}</div>
+                                    <div style="display:flex; gap:0.75rem; margin-top:0.25rem;">
+                                        <a href="${data.openUrl}" target="_blank" style="text-decoration:none; color: var(--blue-primary); font-weight:500;">Open</a>
+                                        <a href="${data.downloadUrl}" style="text-decoration:none; color: var(--blue-primary); font-weight:500;">Download</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="deleteAttachment(${data.id})" style="background:none; border:none; cursor:pointer; color:#e74c3c;">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>`;
+
+                        document.getElementById('attachmentList').insertAdjacentHTML('afterbegin', html);
+                        input.value = '';
+                    } else {
+                        showMessage('attachmentError', data.message || 'Could not upload file.');
+                    }
+                })
+                .catch(() => {
+                    status.style.display = 'none';
+                    showMessage('attachmentError', 'Could not upload file.');
+                });
+            }
+
+            function deleteAttachment(attachmentId) {
+                if (!confirm('Are you sure you want to delete this file?')) return;
+
+                const formData = new FormData();
+                formData.append('attachmentId', attachmentId);
+
+                fetch('/Project/DeleteAttachment', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`att-${attachmentId}`).remove();
+                    } else {
+                        showMessage('attachmentError', data.message || 'Could not delete file.');
+                    }
+                });
+            }
+            </text>
         }
     </script>
     <script src="~/assets/js/script.js"></script>
 </body>
 </html>
-
