@@ -415,6 +415,7 @@ namespace Basecamp_Backend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> DeleteDiscussion(int discussionId)
         {
@@ -430,11 +431,6 @@ namespace Basecamp_Backend.Controllers
             if (user == null)
             {
                 return Json(new { success = false, message = "Please log in." });
-            }
-
-            if (!User.IsInRole("Admin") && discussion.AppUserId != user.Id)
-            {
-                return Json(new { success = false, message = "Access denied." });
             }
 
             _context.Discussions.Remove(discussion);

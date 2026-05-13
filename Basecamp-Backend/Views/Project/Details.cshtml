@@ -2,7 +2,6 @@
 @{
     Layout = null;
     var isAdmin = User.IsInRole("Admin");
-    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -79,7 +78,7 @@
                                         </div>
                                         <p class="message-text">@d.Content</p>
                                     </div>
-                                    @if (isAdmin || d.AppUserId == userId)
+                                    @if (isAdmin)
                                     {
                                         <button onclick="deleteDiscussion(@d.Id)" style="background:none; border:none; cursor:pointer; color:#aaa; margin-left:0.5rem; align-self:flex-start;" title="Delete">
                                             <i class="ph ph-trash"></i>
