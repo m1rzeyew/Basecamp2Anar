@@ -28,11 +28,15 @@ WORKDIR /app
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 
-# Create a non-root user for security
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-USER appuser
+# Debian-compatible non-root user  (aspnet image is Debian, NOT Alpine)
+# Alpine uses: addgroup / adduser
+# Debian uses: groupadd / useradd   ← correct for mcr.microsoft.com/dotnet/aspnet
+RUN groupadd --system appgroup \
+ && useradd  --system --gid appgroup --no-create-home appuser
 
 COPY --from=build --chown=appuser:appgroup /app/publish .
+
+USER appuser
 
 # Expose the default port (Railway overrides via PORT env-var)
 EXPOSE 8080
