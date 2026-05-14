@@ -3,50 +3,32 @@ using Basecamp_Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-// ──────────────────────────────────────────────────────────────────
-//  Legacy timestamp behaviour must be set BEFORE the host is built
-// ──────────────────────────────────────────────────────────────────
+// Must be set BEFORE builder is created
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ──────────────────────────────────────────────────────────────────
-//  Railway injects PORT at runtime – Kestrel MUST honour it
-// ──────────────────────────────────────────────────────────────────
+// ── PORT: Railway injects this dynamically ────────────────────────
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// ──────────────────────────────────────────────────────────────────
-//  PostgreSQL – prefer the Railway DATABASE_URL env-var when present
-// ──────────────────────────────────────────────────────────────────
-var connectionString =
-    Environment.GetEnvironmentVariable("DATABASE_URL")          // Railway native URL
-    ?? Environment.GetEnvironmentVariable("ConnectionStrings__Default") // Railway secret mapping
-    ?? builder.Configuration.GetConnectionString("Default")     // appsettings fallback
-    ?? throw new InvalidOperationException(
-           "No PostgreSQL connection string found. " +
-           "Set DATABASE_URL or ConnectionStrings__Default in Railway environment variables.");
+// ── PostgreSQL: parse DATABASE_URL → Npgsql connection string ─────
+var connectionString = BuildConnectionString(builder.Configuration);
 
-// Npgsql accepts the postgres:// URI format directly; no manual parsing needed.
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(connectionString, npgsql =>
     {
-        // Retry transient failures (helpful at cold-start on Railway)
         npgsql.EnableRetryOnFailure(
             maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorCodesToAdd: null);
     }));
 
-// ──────────────────────────────────────────────────────────────────
-//  ASP.NET Core Identity
-// ──────────────────────────────────────────────────────────────────
+// ── Identity ──────────────────────────────────────────────────────
 builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
-
     opt.Password.RequiredLength = 8;
-
     opt.Lockout.AllowedForNewUsers = true;
     opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);
     opt.Lockout.MaxFailedAccessAttempts = 3;
@@ -54,41 +36,31 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// ──────────────────────────────────────────────────────────────────
-//  MVC + Health checks
-// ──────────────────────────────────────────────────────────────────
 builder.Services.AddControllersWithViews();
-builder.Services.AddHealthChecks()
-    .AddNpgSql(connectionString, name: "postgres", tags: ["db", "ready"]);
+builder.Services.AddHealthChecks();
 
-// ──────────────────────────────────────────────────────────────────
-//  Build
-// ──────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
-// ──────────────────────────────────────────────────────────────────
-//  Auto-migrate + seed roles/admin on every startup
-// ──────────────────────────────────────────────────────────────────
+// ── Auto-migrate + seed ───────────────────────────────────────────
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var db          = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-    var logger      = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
     try
     {
-        logger.LogInformation("Applying EF Core migrations…");
+        logger.LogInformation("Applying EF Core migrations...");
         await db.Database.MigrateAsync();
         logger.LogInformation("Migrations applied successfully.");
     }
     catch (Exception ex)
     {
-        logger.LogCritical(ex, "Database migration failed. Application will not start.");
-        throw; // Surface the real error – do NOT swallow it silently
+        logger.LogCritical(ex, "Database migration failed!");
+        throw;
     }
 
-    // Seed roles
     string[] roles = ["Admin", "Member"];
     foreach (var role in roles)
     {
@@ -99,7 +71,6 @@ await using (var scope = app.Services.CreateAsyncScope())
         }
     }
 
-    // Promote first registered user to Admin if no Admin exists yet
     var adminUsers = await userManager.GetUsersInRoleAsync("Admin");
     if (!adminUsers.Any())
     {
@@ -115,12 +86,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     }
 }
 
-// ──────────────────────────────────────────────────────────────────
-//  Middleware pipeline
-// ──────────────────────────────────────────────────────────────────
-
-// On Railway TLS is terminated at the edge proxy – do NOT redirect
-// to HTTPS inside the container (causes redirect loops).
+// ── Middleware pipeline ───────────────────────────────────────────
 if (!app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
@@ -128,16 +94,11 @@ if (!app.Environment.IsProduction())
 
 app.UseStaticFiles();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Health-check endpoints (used by Railway's health checks / uptime monitors)
+// Railway healthcheck pings this endpoint
 app.MapHealthChecks("/health");
-app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = check => check.Tags.Contains("ready")
-});
 
 app.MapStaticAssets();
 
@@ -150,3 +111,72 @@ app.MapControllerRoute(
     pattern: "{controller=dashboard}/{action=Index}/{id?}");
 
 await app.RunAsync();
+
+// ─────────────────────────────────────────────────────────────────
+// Builds a valid Npgsql connection string from any input format.
+//
+// Railway provides DATABASE_URL as:
+//   postgresql://user:password@host:port/database
+//
+// Npgsql does NOT accept URI format — must be key=value pairs.
+// This function handles both formats safely.
+// ─────────────────────────────────────────────────────────────────
+static string BuildConnectionString(IConfiguration config)
+{
+    // Priority 1: Railway DATABASE_URL (URI format)
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    if (!string.IsNullOrWhiteSpace(databaseUrl))
+    {
+        return ParsePostgresUri(databaseUrl);
+    }
+
+    // Priority 2: Individual Railway PG variables
+    var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+    var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+    var pgUser = Environment.GetEnvironmentVariable("PGUSER");
+    var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
+    var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
+
+    if (!string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgUser))
+    {
+        return $"Host={pgHost};Port={pgPort};Database={pgDatabase};" +
+               $"Username={pgUser};Password={pgPassword};" +
+               $"SSL Mode=Require;Trust Server Certificate=true";
+    }
+
+    // Priority 3: appsettings.json (development fallback)
+    var appSettingsCs = config.GetConnectionString("Default");
+    if (!string.IsNullOrWhiteSpace(appSettingsCs))
+    {
+        return appSettingsCs;
+    }
+
+    throw new InvalidOperationException(
+        "No PostgreSQL connection string found. " +
+        "Set DATABASE_URL environment variable in Railway.");
+}
+
+static string ParsePostgresUri(string uri)
+{
+    // Handles both postgres:// and postgresql:// schemes
+    if (!uri.StartsWith("postgres://") && !uri.StartsWith("postgresql://"))
+        return uri; // Already in key=value format, return as-is
+
+    // Replace scheme so Uri class parses it correctly
+    var normalized = uri.Replace("postgresql://", "http://")
+                        .Replace("postgres://", "http://");
+
+    var parsed = new Uri(normalized);
+    var userInfo = parsed.UserInfo.Split(':', 2);
+    var username = Uri.UnescapeDataString(userInfo[0]);
+    var password = userInfo.Length > 1
+                   ? Uri.UnescapeDataString(userInfo[1])
+                   : string.Empty;
+    var host = parsed.Host;
+    var portNum = parsed.Port > 0 ? parsed.Port : 5432;
+    var database = parsed.AbsolutePath.TrimStart('/');
+
+    return $"Host={host};Port={portNum};Database={database};" +
+           $"Username={username};Password={password};" +
+           $"SSL Mode=Require;Trust Server Certificate=true";
+}
