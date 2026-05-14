@@ -3299,11 +3299,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Anar\\Desktop\\my_basecamp_1\\Basecamp2Anar\\Basecamp-Backend\\Basecamp-Backend.csproj",
+      "projectUniqueName": "C:\\Users\\Anar\\Desktop\\basecamp 2\\Basecamp2Anar\\Basecamp-Backend\\Basecamp-Backend.csproj",
       "projectName": "Basecamp-Backend",
-      "projectPath": "C:\\Users\\Anar\\Desktop\\my_basecamp_1\\Basecamp2Anar\\Basecamp-Backend\\Basecamp-Backend.csproj",
+      "projectPath": "C:\\Users\\Anar\\Desktop\\basecamp 2\\Basecamp2Anar\\Basecamp-Backend\\Basecamp-Backend.csproj",
       "packagesPath": "C:\\Users\\Anar\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Anar\\Desktop\\my_basecamp_1\\Basecamp2Anar\\Basecamp-Backend\\obj\\",
+      "outputPath": "C:\\Users\\Anar\\Desktop\\basecamp 2\\Basecamp2Anar\\Basecamp-Backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

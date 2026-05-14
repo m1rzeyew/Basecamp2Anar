@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Basecamp-Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7be28875dab0bb606af4608e7227f3b8135f86cc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+782ec94c8570e94a54f83cd8def7b8d35b0d7105")]
 [assembly: System.Reflection.AssemblyProductAttribute("Basecamp-Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Basecamp-Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
