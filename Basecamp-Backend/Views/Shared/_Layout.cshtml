@@ -27,7 +27,12 @@
                 {
                     <a asp-controller="Admin" asp-action="Users">Admin</a>
                 }
-                <a asp-controller="account" asp-action="logout">Logout</a>
+                <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" style="background:none;border:0;color:var(--text-secondary);font:inherit;font-weight:500;cursor:pointer;">
+                        Logout
+                    </button>
+                </form>
 
             }
             else

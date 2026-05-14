@@ -27,11 +27,12 @@
         <div class="auth-card">
             <h2 class="auth-title">Create an account</h2>
             <form method="POST">
+                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label class="form-label" for="fullname">Full Name</label>
                     <input asp-for="FullName" id="fullname" class="form-control" placeholder="Jane Doe" required>
-                    <span asp-validation-for="FullName" class="text-danger"></span>
+                    <span asp-validation-for="Username" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="UserName">User Name</label>

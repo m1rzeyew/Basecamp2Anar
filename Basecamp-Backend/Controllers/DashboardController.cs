@@ -1,14 +1,15 @@
 using Basecamp_Backend.Data;
 using Basecamp_Backend.Models;
 using Basecamp_Backend.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using System.Security.Claims;
 
 namespace Basecamp_Backend.Controllers
 {
+    [Authorize]
     public class DashboardController : Controller
     {
         private readonly AppDbContext _context;
@@ -23,22 +24,20 @@ namespace Basecamp_Backend.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
             if (userId == null) return RedirectToAction("Login", "Account");
 
             var userProjects = await _context.Projects
                 .Include(p => p.Members)
                 .Where(p => p.Members.Any(m => m.AppUserId == userId))
+                .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
             var viewModel = new DashboardVM
             {
                 AllProjects = userProjects,
-
                 CreatedByMe = userProjects
                     .Where(p => p.Members.Any(m => m.AppUserId == userId && m.Role == "Owner"))
                     .ToList(),
-
                 SharedWithMe = userProjects
                     .Where(p => p.Members.Any(m => m.AppUserId == userId && m.Role != "Owner"))
                     .ToList()
@@ -48,42 +47,38 @@ namespace Basecamp_Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProject(string Name, string Description)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateProject(string name, string? description)
         {
-             
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToAction("Login", "Account");
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
 
-            if (string.IsNullOrWhiteSpace(Name))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                TempData["Error"] = "Project name is required!";
+                TempData["Error"] = "Project name is required.";
                 return RedirectToAction(nameof(Index));
             }
 
             var newProject = new Project
             {
-                Name = Name,
-                Description = Description
+                Name = name.Trim(),
+                Description = description?.Trim() ?? string.Empty
             };
 
             _context.Projects.Add(newProject);
-            await _context.SaveChangesAsync();  
-
-            var projectMember = new ProjectMember
-            {
-                ProjectId = newProject.Id,  
-                AppUserId = userId,
-                Role = "Owner"
-            };
-
-            _context.ProjectMembers.Add(projectMember);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Project created successfully!";
+            _context.ProjectMembers.Add(new ProjectMember
+            {
+                ProjectId = newProject.Id,
+                AppUserId = user.Id,
+                Role = "Owner"
+            });
 
-          
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Project created successfully.";
+
             return RedirectToAction(nameof(Index));
         }
-
     }
 }

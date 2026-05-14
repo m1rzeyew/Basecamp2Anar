@@ -5,40 +5,49 @@
         <h1 class="page-title">Admin Users</h1>
     </div>
 
-    <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-        <table style="width: 100%; border-collapse: collapse;">
+    @if (TempData["Error"] is string error)
+    {
+        <div style="margin-bottom:1rem;padding:0.75rem 1rem;border:1px solid #feb2b2;background:#fff5f5;color:var(--red-primary);border-radius:6px;">
+            @error
+        </div>
+    }
+
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:auto;">
+        <table style="width:100%;border-collapse:collapse;">
             <thead>
-                <tr style="background: #f9fafb;">
-                    <th style="padding: 1rem; text-align: left;">Name</th>
-                    <th style="padding: 1rem; text-align: left;">Username</th>
-                    <th style="padding: 1rem; text-align: left;">Email</th>
-                    <th style="padding: 1rem; text-align: left;">Role</th>
-                    <th style="padding: 1rem; text-align: left;">Action</th>
+                <tr style="background:#f9fafb;">
+                    <th style="padding:1rem;text-align:left;">Name</th>
+                    <th style="padding:1rem;text-align:left;">Username</th>
+                    <th style="padding:1rem;text-align:left;">Email</th>
+                    <th style="padding:1rem;text-align:left;">Global Role</th>
+                    <th style="padding:1rem;text-align:left;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model)
                 {
-                    <tr style="border-top: 1px solid #e5e7eb;">
-                        <td style="padding: 1rem;">@user.FullName</td>
-                        <td style="padding: 1rem;">@user.UserName</td>
-                        <td style="padding: 1rem;">@user.Email</td>
-                        <td style="padding: 1rem;">@(user.IsAdmin ? "Admin" : "Member")</td>
-                        <td style="padding: 1rem;">
+                    <tr style="border-top:1px solid #e5e7eb;">
+                        <td style="padding:1rem;">@user.FullName</td>
+                        <td style="padding:1rem;">@user.UserName</td>
+                        <td style="padding:1rem;">@user.Email</td>
+                        <td style="padding:1rem;">@(user.IsAdmin ? "Admin" : "Member")</td>
+                        <td style="padding:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
                             @if (user.IsAdmin)
                             {
-                                <form asp-controller="Admin" asp-action="UpdateRole" asp-route-id="@user.Id" method="post" style="display: inline;">
+                                <form asp-controller="Admin" asp-action="RemoveAdmin" asp-route-id="@user.Id" method="post" style="display:inline;">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="role" value="Member">
-                                    <button type="submit" class="btn btn-gray">Demote</button>
+                                    <button type="submit" class="btn btn-gray">Remove Admin</button>
                                 </form>
                             }
                             else
                             {
-                                <form asp-controller="Admin" asp-action="UpdateRole" asp-route-id="@user.Id" method="post" style="display: inline;">
+                                <form asp-controller="Admin" asp-action="MakeAdmin" asp-route-id="@user.Id" method="post" style="display:inline;">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="role" value="Admin">
-                                    <button type="submit" class="btn btn-primary">Promote</button>
+                                    <button type="submit" class="btn btn-primary">Make Admin</button>
+                                </form>
+                                <form asp-controller="Admin" asp-action="Delete" asp-route-id="@user.Id" method="post" style="display:inline;" onsubmit="return confirm('Delete this non-admin user and clean up owned projects?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">Delete</button>
                                 </form>
                             }
                         </td>

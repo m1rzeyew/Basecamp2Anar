@@ -1,12 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Basecamp_Backend.ViewModels.Account
 {
     public class LoginVM
     {
-        public string UsernameOrEmail { get; set; }
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
+        [Required]
+        public string UsernameOrEmail { get; set; } = string.Empty;
 
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
     }
 }

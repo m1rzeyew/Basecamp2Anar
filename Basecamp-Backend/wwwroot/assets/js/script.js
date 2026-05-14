@@ -36,11 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionButtons = document.querySelectorAll('.btn-icon');
     actionButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // Just a visual cue that it was clicked, since there's no backend
+            const projectCard = btn.closest('.project-card');
+            if (!projectCard) return;
+
             const isDelete = btn.classList.contains('btn-delete');
             const action = isDelete ? 'Delete' : 'Edit';
-            const projectName = btn.closest('.project-card').querySelector('.project-title').textContent;
+            const projectName = projectCard.querySelector('.project-title').textContent;
 
             console.log(`${action} clicked for project: ${projectName}`);
         });
@@ -73,68 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Tasks Interaction Logic
-    const taskList = document.querySelector('.task-list');
-    const addTaskBtn = document.querySelector('#tasks .btn-primary');
-    const addTaskInput = document.querySelector('#tasks .form-control');
-
-    if (taskList) {
-        // Toggle and Delete (using Event Delegation for dynamic items)
-        taskList.addEventListener('click', (e) => {
-            const taskItem = e.target.closest('.task-item');
-            if (!taskItem) return;
-
-            // 1. Delete Action
-            if (e.target.closest('.btn-delete-task')) {
-                taskItem.classList.add('fade-out');
-                taskItem.addEventListener('transitionend', () => {
-                    taskItem.remove();
-                }, { once: true });
-                return;
-            }
-
-            // 2. Visual Check Toggle
-            if (e.target.closest('.custom-checkbox') || e.target.closest('.task-text')) {
-                taskItem.classList.toggle('completed');
-                const checkbox = taskItem.querySelector('.custom-checkbox');
-                if (taskItem.classList.contains('completed')) {
-                    checkbox.innerHTML = '<i class="ph ph-check-bold"></i>';
-                } else {
-                    checkbox.innerHTML = '';
-                }
-            }
-        });
-    }
-
-    if (addTaskBtn && addTaskInput) {
-        // 3. Add Task Simulation
-        const handleAddTask = () => {
-            const taskName = addTaskInput.value.trim();
-            if (taskName) {
-                const newTask = document.createElement('div');
-                newTask.className = 'task-item';
-                newTask.innerHTML = `
-                    <div class="custom-checkbox"></div>
-                    <span class="task-text">${taskName}</span>
-                    <div class="btn-delete-task" title="Delete Task"><i class="ph ph-x"></i></div>
-                `;
-
-                // Prepend to list
-                taskList.prepend(newTask);
-
-                // Clear input
-                addTaskInput.value = '';
-                addTaskInput.focus();
-            }
-        };
-
-        addTaskBtn.addEventListener('click', handleAddTask);
-
-        // Also add on Enter key
-        addTaskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleAddTask();
-            }
-        });
-    }
+    // Project task operations are handled by the MVC view so every write can
+    // include authorization and antiforgery validation.
 });

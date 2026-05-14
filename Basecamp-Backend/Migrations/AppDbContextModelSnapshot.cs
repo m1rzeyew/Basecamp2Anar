@@ -104,6 +104,10 @@ namespace Basecamp_Backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -122,9 +126,14 @@ namespace Basecamp_Backend.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UploadedByUserId")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("UploadedByUserId");
 
                     b.ToTable("Attachments");
                 });
@@ -221,6 +230,9 @@ namespace Basecamp_Backend.Migrations
 
                     b.HasIndex("ProjectId");
 
+                    b.HasIndex("ProjectId", "AppUserId")
+                        .IsUnique();
+
                     b.ToTable("ProjectMembers");
                 });
 
@@ -253,6 +265,79 @@ namespace Basecamp_Backend.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("projectTasks");
+                });
+
+            modelBuilder.Entity("Basecamp_Backend.Models.ProjectThread", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByUserId")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectThreads");
+                });
+
+            modelBuilder.Entity("Basecamp_Backend.Models.ThreadMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("ProjectThreadId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectThreadId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ThreadMessages");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -395,7 +480,14 @@ namespace Basecamp_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Basecamp_Backend.Models.AppUser", "UploadedByUser")
+                        .WithMany("UploadedAttachments")
+                        .HasForeignKey("UploadedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Project");
+
+                    b.Navigation("UploadedByUser");
                 });
 
             modelBuilder.Entity("Basecamp_Backend.Models.Discussion", b =>
@@ -415,6 +507,43 @@ namespace Basecamp_Backend.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Basecamp_Backend.Models.ProjectThread", b =>
+                {
+                    b.HasOne("Basecamp_Backend.Models.AppUser", "CreatedByUser")
+                        .WithMany("CreatedThreads")
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Basecamp_Backend.Models.Project", "Project")
+                        .WithMany("Threads")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Basecamp_Backend.Models.ThreadMessage", b =>
+                {
+                    b.HasOne("Basecamp_Backend.Models.ProjectThread", "ProjectThread")
+                        .WithMany("Messages")
+                        .HasForeignKey("ProjectThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Basecamp_Backend.Models.AppUser", "User")
+                        .WithMany("ThreadMessages")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProjectThread");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Basecamp_Backend.Models.ProjectMember", b =>
@@ -500,9 +629,15 @@ namespace Basecamp_Backend.Migrations
 
             modelBuilder.Entity("Basecamp_Backend.Models.AppUser", b =>
                 {
+                    b.Navigation("CreatedThreads");
+
                     b.Navigation("Discussions");
 
                     b.Navigation("ProjectMembers");
+
+                    b.Navigation("ThreadMessages");
+
+                    b.Navigation("UploadedAttachments");
                 });
 
             modelBuilder.Entity("Basecamp_Backend.Models.Project", b =>
@@ -514,6 +649,13 @@ namespace Basecamp_Backend.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("Tasks");
+
+                    b.Navigation("Threads");
+                });
+
+            modelBuilder.Entity("Basecamp_Backend.Models.ProjectThread", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

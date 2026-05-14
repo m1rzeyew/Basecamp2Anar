@@ -1,4 +1,4 @@
-﻿@model Project
+@model Project
 @{
     Layout = null;
 }
@@ -7,175 +7,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Settings | Dashboard</title>
-  
+    <title>@Model.Name | Project Settings</title>
     <script src="https://unpkg.com/@@phosphor-icons/web"></script>
     <link rel="stylesheet" href="~/assets/css/style.css">
 </head>
 <body>
-
-    <!-- Header -->
     <header class="header">
         <div class="header-logo">
-            <a asp-controller="Dashboard" asp-action="index" style="text-decoration: none; color: var(--blue-primary); font-weight: 700; font-size: 0.95rem;">
-                <i class="ph ph-arrow-left"></i> Back to Dashboard
+            <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.Id" style="text-decoration:none;color:var(--blue-primary);font-weight:700;font-size:0.95rem;">
+                <i class="ph ph-arrow-left"></i> Back to Project
             </a>
         </div>
     </header>
 
+    <form id="antiForgeryForm" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+
     <main class="main-content">
-    
-        <!-- Top Section -->
         <div class="project-detail-header">
             <h1 class="page-title">Settings</h1>
+            <p class="project-detail-desc">@Model.Name</p>
         </div>
 
-        <div class="project-layout">
-      
-            <!-- Sidebar (Left) -->
-            <aside class="sidebar-card">
-                <ul class="sidebar-menu">
-                    <li class="sidebar-item active">
-                        <a style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; width: 100%;">
-                            <i class="ph ph-gear"></i> Manage Project
-                        </a>
-                    </li>
-                    @* <li class="sidebar-item">
-                        <a href="project-details.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; width: 100%;">
-                            <i class="ph ph-chat-circle-dots"></i> Discussions
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="project-details.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; width: 100%;">
-                            <i class="ph ph-check-square"></i> Tasks
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="project-details.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; width: 100%;">
-                            <i class="ph ph-users"></i> Members
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="project-details.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; width: 100%;">
-                            <i class="ph ph-paperclip"></i> Attachments
-                        </a>
-                    </li> *@
-                </ul>
-            </aside>
+        @if (TempData["Error"] is string error)
+        {
+            <div style="margin-bottom:1rem;padding:0.75rem 1rem;border:1px solid #feb2b2;background:#fff5f5;color:var(--red-primary);border-radius:6px;">
+                @error
+            </div>
+        }
+        @if (TempData["Success"] is string success)
+        {
+            <div style="margin-bottom:1rem;padding:0.75rem 1rem;border:1px solid #b7e4c7;background:#f0fff4;color:#276749;border-radius:6px;">
+                @success
+            </div>
+        }
 
-            <!-- Main Content Area -->
-            <div class="settings-layout">
-        
-                <!-- Main Form (Middle) -->
-
-                
-
-                
-                <section class="content-card">
-          
-                    <div class="settings-section">
-                        <label class="settings-label">Project Name</label>
-                        <form asp-action="UpdateSettings" method="post" class="input-group">
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <input type="text" name="Name" class="form-control" value="@Model.Name">
-                            <input type="hidden" name="Description" value="@Model.Description" />
-                            <button type="submit" class="btn btn-primary">Update</button>
-                        </form>
-                    </div>
-
-                    <div class="settings-section">
-                        <label class="settings-label">Description</label>
-                        <form asp-action="UpdateSettings" method="post" style="display: flex; flex-direction: column; gap: 1rem;">
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <input type="hidden" name="Name" value="@Model.Name" />
-                            <textarea name="Description" class="form-control" rows="4" style="resize: vertical;">@Model.Description</textarea>
-                            <div style="text-align: right;">
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="settings-section">
-                        <label class="settings-label">Add Member</label>
-                        <form asp-action="AddMember" method="post" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-                            <input type="hidden" name="projectId" value="@Model.Id" />
-        
-                            <input type="email" name="email" class="form-control" style="flex: 1; min-width: 200px;" placeholder="Enter user email" required>
-    
-                            <div class="toggle-group">
-                                <span style="font-size: 0.9rem; font-weight: 600;">Admin</span>
-                                <label class="switch">
-                                    <input type="checkbox" name="isAdmin" value="true">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-
-                            <button type="submit" class="btn btn-green">
-                                <i class="ph ph-user-plus"></i> Add Member
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Current Members -->
-                    <div class="settings-section">
-                        <label class="settings-label">Current Members</label>
-                        <div class="members-list">
-                            @foreach (var member in Model.Members) // Modelinə uyğun siyahı
-                            {
-                                <div class="member-item" id="member-row-@member.AppUserId">
-                                    <div class="member-info">
-                                        <div class="avatar"><i class="ph ph-user"></i></div>
-                                        <div>
-                                            <span class="user-name">@member.AppUser.FullName</span>
-                                            <span class="user-email" style="display:block; font-size:12px; color:gray;">@member.AppUser.Email</span>
-                                        </div>
-                                    </div>
-            
-                                    <div class="member-actions" style="display: flex; gap: 10px; align-items: center;">
-                                        <select class="form-control-sm" onchange="changeRole('@Model.Id', '@member.AppUserId', this.value)">
-                                            <option value="Member" selected="@(member.Role == "Member")">Member</option>
-                                            <option value="Admin" selected="@(member.Role == "Admin")">Admin</option>
-                                        </select>
-
-                                        <button class="btn-icon text-danger" onclick="removeMemberFromProject('@Model.Id', '@member.AppUserId')">
-                                            <i class="ph ph-user-minus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                </section>
-
-                <!-- #endregion -->
-
-                <section class="content-section content-card">
+        <div class="settings-layout" style="grid-template-columns:1fr 280px;">
+            <section class="content-card">
+                <div class="settings-section">
                     <h2 class="section-title"><i class="ph ph-gear"></i> General Settings</h2>
                     <form asp-action="UpdateSettings" method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Id" />
                         <div class="form-group">
                             <label class="form-label">Project Name</label>
                             <input type="text" name="Name" class="form-control" value="@Model.Name" required>
                         </div>
-                        <div class="form-group" style="margin-top: 1rem;">
+                        <div class="form-group">
                             <label class="form-label">Description</label>
-                            <textarea name="Description" class="form-control" rows="3">@Model.Description</textarea>
+                            <textarea name="Description" class="form-control" rows="4">@Model.Description</textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">Save Changes</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
-                </section>
+                </div>
 
-                <section class="content-section content-card" style="margin-top: 2rem;">
-                    <h2 class="section-title"><i class="ph ph-user-plus"></i> Add New Member</h2>
-                    <form asp-action="AddMember" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div class="settings-section">
+                    <h2 class="section-title"><i class="ph ph-user-plus"></i> Add Member</h2>
+                    <form asp-action="AddMember" method="post" style="display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="projectId" value="@Model.Id" />
-                        <div style="flex: 2;">
+                        <div style="flex:2;min-width:220px;">
                             <label class="form-label">User Email</label>
                             <input type="email" name="email" class="form-control" placeholder="example@mail.com" required>
                         </div>
-                        <div style="flex: 1;">
-                            <label class="form-label">Role</label>
+                        <div style="flex:1;min-width:160px;">
+                            <label class="form-label">Project Role</label>
                             <select name="role" class="form-control">
                                 <option value="Member">Member</option>
                                 <option value="Admin">Admin</option>
@@ -183,106 +80,119 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Add</button>
                     </form>
-                </section>
+                </div>
 
-                <section class="content-section content-card" style="margin-top: 2rem;">
+                <div class="settings-section">
                     <h2 class="section-title"><i class="ph ph-users"></i> Project Members</h2>
                     <div class="members-list">
-                        @if (Model.Members is not null)
+                        @foreach (var member in Model.Members.OrderBy(m => m.Role == "Owner" ? 0 : m.Role == "Admin" ? 1 : 2).ThenBy(m => m.AppUser.FullName))
                         {
-                            @foreach (var member in Model.Members)
-                            {
-                                <div class="member-item" id="member-row-@member.AppUserId"
-                                     style="display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--border-color);">
-                                    <div class="member-info">
+                            <div class="member-item" id="member-row-@member.AppUserId" style="display:flex;justify-content:space-between;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--border-color);">
+                                <div class="member-info">
+                                    <div class="avatar"><i class="ph ph-user"></i></div>
+                                    <div>
                                         <strong>@member.AppUser.FullName</strong>
-                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">(@member.AppUser.Email)</span>
-                                        <span class="badge" style="margin-left: 10px; background: #eee; padding: 2px 8px; border-radius: 4px;">
-                                            @member.Role
-                                        </span>
+                                        <span style="display:block;font-size:0.8rem;color:var(--text-secondary);">@member.AppUser.Email</span>
                                     </div>
-                
-                                    @if (member.Role != "Owner") // Sahibi silmək olmaz
+                                </div>
+
+                                <div class="member-actions" style="display:flex;gap:0.5rem;align-items:center;">
+                                    @if (member.Role == "Owner")
                                     {
-                                        <div class="member-actions">
-                                            <button onclick="removeMemberFromProject(@Model.Id, '@member.AppUserId')" class="btn-icon btn-delete">
-                                                <i class="ph ph-trash"></i>
-                                            </button>
-                                        </div>
+                                        <span class="badge-pill badge-owner">Owner</span>
+                                    }
+                                    else
+                                    {
+                                        <select class="form-control" style="width:140px;" onchange="changeRole('@Model.Id', '@member.AppUserId', this.value)">
+                                            <option value="Member" selected="@(member.Role == "Member")">Member</option>
+                                            <option value="Admin" selected="@(member.Role == "Admin")">Admin</option>
+                                        </select>
+                                        <button class="btn-icon btn-delete" onclick="removeMemberFromProject('@Model.Id', '@member.AppUserId')" title="Remove member">
+                                            <i class="ph ph-trash"></i>
+                                        </button>
                                     }
                                 </div>
-                            }
+                            </div>
                         }
                     </div>
-                </section>
+                </div>
+            </section>
 
-                  
-
-                <!-- Right Side Panel -->
-                <aside class="sidebar-right">
-                    <div class="side-panel">
-                        <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline">
-                            <i class="ph ph-eye"></i> Preview Project
-                        </a>
-        
-                        <button class="btn btn-outline-danger" onclick="directDeleteProject(@Model.Id)">
-                            <i class="ph ph-trash"></i> Delete Project
-                        </button>
-                    </div>
-                </aside>
-
-            </div>
+            <aside class="sidebar-right">
+                <div class="side-panel">
+                    <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline">
+                        <i class="ph ph-eye"></i> Preview Project
+                    </a>
+                    <button class="btn btn-danger" onclick="directDeleteProject(@Model.Id)">
+                        <i class="ph ph-trash"></i> Delete Project
+                    </button>
+                </div>
+            </aside>
         </div>
     </main>
 
     <script>
+        function getRequestVerificationToken() {
+            return document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+        }
+
+        function tokenFormData() {
+            const formData = new FormData();
+            formData.append('__RequestVerificationToken', getRequestVerificationToken());
+            return formData;
+        }
+
         function directDeleteProject(id) {
-        if (confirm("Bu layihəni birdəfəlik silmək istədiyinizə əminsiniz?")) {
-        fetch(`/Project/HardDelete?id=${id}`, {
-        method: 'POST'
-        }).then(res => {
-        if(res.ok) {
-        // Proyekt silindiyi üçün ana səhifəyə (Dashboard) qayıdırıq
-        window.location.href = '/Dashboard/Index';
-        } else {
-        alert("Silinmə zamanı xəta baş verdi!");
+            if (!confirm('Delete this project permanently?')) return;
+
+            const formData = tokenFormData();
+            formData.append('id', id);
+
+            fetch('/Project/HardDelete', {
+                method: 'POST',
+                body: formData
+            }).then(res => {
+                if (res.ok) {
+                    window.location.href = '/Dashboard/Index';
+                } else {
+                    alert('Could not delete the project.');
+                }
+            });
         }
-        }).catch(err => {
-        console.error("Xəta:", err);
-        alert("Bağlantı xətası!");
-        });
-        }
-        }
+
         function changeRole(projectId, userId, newRole) {
-        // Backend-ə rol dəyişikliyini göndəririk
-        fetch(`/Project/UpdateMemberRole`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `projectId=${projectId}&userId=${userId}&role=${newRole}`
-        }).then(res => {
-        if (!res.ok) alert("Could not update role.");
-        });
+            const formData = tokenFormData();
+            formData.append('projectId', projectId);
+            formData.append('userId', userId);
+            formData.append('role', newRole);
+
+            fetch('/Project/UpdateMemberRole', {
+                method: 'POST',
+                body: formData
+            }).then(res => {
+                if (!res.ok) alert('Could not update role.');
+            });
         }
 
         function removeMemberFromProject(projectId, userId) {
-        if (confirm("Are you sure you want to remove this member?")) {
-        fetch(`/Project/RemoveMember`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `projectId=${projectId}&userId=${userId}`
-        }).then(res => {
-        if (res.ok) {
-        // Siyahıdan vizual olaraq silirik
-        document.getElementById(`member-row-${userId}`).remove();
-        } else {
-        alert("Error removing member.");
-        }
-        });
-        }
+            if (!confirm('Remove this member from the project?')) return;
+
+            const formData = tokenFormData();
+            formData.append('projectId', projectId);
+            formData.append('userId', userId);
+
+            fetch('/Project/RemoveMember', {
+                method: 'POST',
+                body: formData
+            }).then(res => {
+                if (res.ok) {
+                    document.getElementById(`member-row-${userId}`).remove();
+                } else {
+                    alert('Could not remove member.');
+                }
+            });
         }
     </script>
-
     <script src="~/assets/js/script.js"></script>
 </body>
 </html>
-

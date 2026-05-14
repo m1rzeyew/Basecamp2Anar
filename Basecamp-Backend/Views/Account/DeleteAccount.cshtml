@@ -34,6 +34,7 @@
             </p>
 
             <form method="post">
+                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label class="form-label" for="username">Username</label>
@@ -47,7 +48,7 @@
                 </div>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
-                    <a href="profile.html" class="btn btn-gray" style="flex: 1; justify-content: center; text-decoration: none;">Cancel</a>
+                    <a asp-action="UserPage" class="btn btn-gray" style="flex: 1; justify-content: center; text-decoration: none;">Cancel</a>
                     <button asp-controller="Account" asp-action="DeleteAccount" type="submit" class="btn btn-danger" style="flex: 2; justify-content: center;">
                         Permanently Delete My Account
                     </button>
