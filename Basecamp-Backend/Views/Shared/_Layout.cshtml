@@ -23,6 +23,10 @@
                 <a asp-controller="account" asp-action="UserPage">
                     <i class="ph ph-user-circle"></i> Profile
                 </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Admin" asp-action="Users">Admin</a>
+                }
                 <a asp-controller="account" asp-action="logout">Logout</a>
 
             }

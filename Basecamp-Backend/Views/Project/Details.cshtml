@@ -194,7 +194,7 @@
                                             };
                                         }
                                         <i class="ph @icon" style="font-size:1.5rem; color: var(--blue-primary);"></i>
-                                        <a href="@att.FilePath" target="_blank"
+                                        <a href="@att.FilePath" download="@att.FileName"
                                                style="text-decoration:none; color: inherit; font-weight:500;">
                                             @att.FileName
                                         </a>
@@ -340,7 +340,7 @@
         border-radius: 8px; margin-bottom: 0.5rem;">
         <div style="display:flex; align-items:center; gap: 0.75rem;">
         <i class="ph ${icon}" style="font-size:1.5rem; color: var(--blue-primary);"></i>
-        <a href="${data.filePath}" target="_blank"
+        <a href="${data.filePath}" download="${data.fileName}"
         style="text-decoration:none; color: inherit; font-weight:500;">
         ${data.fileName}
         </a>

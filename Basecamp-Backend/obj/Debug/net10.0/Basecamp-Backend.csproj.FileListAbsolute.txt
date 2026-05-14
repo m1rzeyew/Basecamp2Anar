@@ -484,7 +484,6 @@ C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\scopedcss\bundle\Basecamp-Backend.styles.css
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\scopedcss\projectbundle\Basecamp-Backend.bundle.scp.css
-C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\compressed\03hat27g72-{0}-hlui7dktcg-hlui7dktcg.gz
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\compressed\2u0slfj4mc-{0}-3qp6shhp3f-3qp6shhp3f.gz
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\compressed\ji7mk34u79-{0}-3ldmg2x2rm-3ldmg2x2rm.gz
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\compressed\kh7efo8zp4-{0}-3ldmg2x2rm-3ldmg2x2rm.gz
@@ -500,3 +499,4 @@ C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\Basecamp-Backend.genruntimeconfig.cache
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\ref\Basecamp-Backend.dll
 C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
+C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\obj\Debug\net10.0\compressed\03hat27g72-{0}-4qgfqq1baa-4qgfqq1baa.gz

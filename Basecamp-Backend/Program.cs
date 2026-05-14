@@ -36,6 +36,34 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+
+    string[] roles = { "Admin", "Member" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+
+    var adminUsers = await userManager.GetUsersInRoleAsync("Admin");
+
+    if (!adminUsers.Any())
+    {
+        var firstUser = await userManager.Users.OrderBy(u => u.UserName).FirstOrDefaultAsync();
+
+        if (firstUser is not null)
+        {
+            await userManager.AddToRoleAsync(firstUser, "Admin");
+        }
+    }
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

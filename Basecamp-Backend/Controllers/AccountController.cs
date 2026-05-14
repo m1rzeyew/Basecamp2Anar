@@ -35,6 +35,8 @@ namespace Basecamp_Backend.Controllers
         {
             if (!ModelState.IsValid) return View();
 
+            var usersCount = await _userManager.Users.CountAsync();
+
             AppUser user = new AppUser()
             {
                 FullName = registerVM.FullName,
@@ -51,7 +53,9 @@ namespace Basecamp_Backend.Controllers
                     return View();
                 }
             }
-            //await _userManager.AddToRoleAsync(user, UserRole.Member.ToString());
+
+            var role = usersCount == 0 ? "Admin" : "Member";
+            await _userManager.AddToRoleAsync(user, role);
 
             return RedirectToAction(nameof(Login));
         }

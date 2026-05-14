@@ -1,0 +1,50 @@
+@model List<Basecamp_Backend.ViewModels.Admin.AdminUserVM>
+
+<main class="main-content">
+    <div class="page-header">
+        <h1 class="page-title">Admin Users</h1>
+    </div>
+
+    <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f9fafb;">
+                    <th style="padding: 1rem; text-align: left;">Name</th>
+                    <th style="padding: 1rem; text-align: left;">Username</th>
+                    <th style="padding: 1rem; text-align: left;">Email</th>
+                    <th style="padding: 1rem; text-align: left;">Role</th>
+                    <th style="padding: 1rem; text-align: left;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr style="border-top: 1px solid #e5e7eb;">
+                        <td style="padding: 1rem;">@user.FullName</td>
+                        <td style="padding: 1rem;">@user.UserName</td>
+                        <td style="padding: 1rem;">@user.Email</td>
+                        <td style="padding: 1rem;">@(user.IsAdmin ? "Admin" : "Member")</td>
+                        <td style="padding: 1rem;">
+                            @if (user.IsAdmin)
+                            {
+                                <form asp-controller="Admin" asp-action="UpdateRole" asp-route-id="@user.Id" method="post" style="display: inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="role" value="Member">
+                                    <button type="submit" class="btn btn-gray">Demote</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-controller="Admin" asp-action="UpdateRole" asp-route-id="@user.Id" method="post" style="display: inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="role" value="Admin">
+                                    <button type="submit" class="btn btn-primary">Promote</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</main>
