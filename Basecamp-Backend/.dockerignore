@@ -1,0 +1,33 @@
+## VCS
+.git
+.gitignore
+.gitattributes
+
+## IDE / OS artefacts
+.vs
+.vscode
+*.user
+.DS_Store
+Thumbs.db
+
+## Build output (never copy into image – multi-stage build handles this)
+**/bin/
+**/obj/
+
+## Development secrets – NEVER bake into the image
+.env
+.env.*
+**/appsettings.Development.json
+**/secrets.json
+**/launchSettings.json
+
+## Test projects
+**/*.Tests/
+**/*.Test/
+**/tests/
+**/test/
+
+## Docs / misc
+README.md
+*.md
+docs/

@@ -5,22 +5,35 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Basecamp_Backend</RootNamespace>
+    <!--
+      Deterministic builds improve Docker layer caching and
+      make Railway build logs reproducible.
+    -->
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
+    <!-- Identity + EF Core -->
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore"                     Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"              Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.7">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools"               Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <!--
+      PostgreSQL provider.
+      ❌ REMOVED: Microsoft.EntityFrameworkCore.SqlServer  – not used, adds dead weight
+      ❌ REMOVED: Npgsql.EntityFrameworkCore.PostgreSQL.Design v1.1.0 – obsolete, conflicts
+    -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" />
+
+    <!-- Health checks – required for /health endpoint wired in Program.cs -->
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>

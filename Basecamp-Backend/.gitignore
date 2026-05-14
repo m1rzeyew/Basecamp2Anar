@@ -1,0 +1,21 @@
+## ── .NET ──────────────────────────────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## ── Secrets (NEVER commit these) ─────────────────────────────────
+.env
+.env.*
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+## ── Publish output ────────────────────────────────────────────────
+publish/
+out/
+
+## ── OS artefacts ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
