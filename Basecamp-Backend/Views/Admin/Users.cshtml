@@ -1,30 +1,15 @@
-<<<<<<< HEAD
-@model List<AppUser>
-@{
-    var adminIds = ViewBag.AdminIds as List<string> ?? new List<string>();
-}
-=======
 @model List<Basecamp_Backend.ViewModels.Admin.AdminUserVM>
->>>>>>> main
 
 <main class="main-content">
     <div class="page-header">
         <h1 class="page-title">Admin Users</h1>
     </div>
 
-<<<<<<< HEAD
-    <div class="content-card">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="border-bottom: 1px solid var(--border-color);">
-                    <th style="padding: 1rem; text-align: left;">Full Name</th>
-=======
     <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="background: #f9fafb;">
                     <th style="padding: 1rem; text-align: left;">Name</th>
->>>>>>> main
                     <th style="padding: 1rem; text-align: left;">Username</th>
                     <th style="padding: 1rem; text-align: left;">Email</th>
                     <th style="padding: 1rem; text-align: left;">Role</th>
@@ -34,17 +19,6 @@
             <tbody>
                 @foreach (var user in Model)
                 {
-<<<<<<< HEAD
-                    var isAdmin = adminIds.Contains(user.Id);
-
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 1rem;">@user.FullName</td>
-                        <td style="padding: 1rem;">@user.UserName</td>
-                        <td style="padding: 1rem;">@user.Email</td>
-                        <td style="padding: 1rem;">@(isAdmin ? "Admin" : "Member")</td>
-                        <td style="padding: 1rem;">
-                            @if (isAdmin)
-=======
                     <tr style="border-top: 1px solid #e5e7eb;">
                         <td style="padding: 1rem;">@user.FullName</td>
                         <td style="padding: 1rem;">@user.UserName</td>
@@ -52,7 +26,6 @@
                         <td style="padding: 1rem;">@(user.IsAdmin ? "Admin" : "Member")</td>
                         <td style="padding: 1rem;">
                             @if (user.IsAdmin)
->>>>>>> main
                             {
                                 <form asp-controller="Admin" asp-action="UpdateRole" asp-route-id="@user.Id" method="post" style="display: inline;">
                                     @Html.AntiForgeryToken()

@@ -1,15 +1,8 @@
 using Basecamp_Backend.Models;
-<<<<<<< HEAD
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-=======
 using Basecamp_Backend.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
->>>>>>> main
 
 namespace Basecamp_Backend.Controllers
 {
@@ -31,22 +24,6 @@ namespace Basecamp_Backend.Controllers
             await CreateRoleIfMissing("Admin");
             await CreateRoleIfMissing("Member");
 
-<<<<<<< HEAD
-            var users = await _userManager.Users.OrderBy(u => u.UserName).ToListAsync();
-            var adminIds = new List<string>();
-
-            foreach (var user in users)
-            {
-                if (await _userManager.IsInRoleAsync(user, "Admin"))
-                {
-                    adminIds.Add(user.Id);
-                }
-            }
-
-            ViewBag.AdminIds = adminIds;
-
-            return View(users);
-=======
             var users = _userManager.Users.OrderBy(u => u.UserName).ToList();
             var model = new List<AdminUserVM>();
 
@@ -63,7 +40,6 @@ namespace Basecamp_Backend.Controllers
             }
 
             return View(model);
->>>>>>> main
         }
 
         [HttpPost("/admin/update-role/{id}")]
@@ -80,11 +56,7 @@ namespace Basecamp_Backend.Controllers
 
             var user = await _userManager.FindByIdAsync(id);
 
-<<<<<<< HEAD
-            if (user == null)
-=======
             if (user is null)
->>>>>>> main
             {
                 return NotFound();
             }

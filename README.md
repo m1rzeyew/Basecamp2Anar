@@ -1,142 +1,65 @@
-# My Basecamp 2
+### Basecamp Project Management System
 
-## Live Demo
+### Description
+This project is a project management and collaboration tool. It allows users to register, log in, create new projects, and share them with friends. Key features include a discussion section for team communication and full CRUD (Create, Read, Update, Delete) functionality for managing project tasks.
 
-[https://basecamp2anar-production.up.railway.app/](https://basecamp2anar-production.up.railway.app/)
+### Features
+Authentication: Secure Login and Registration system.
 
-## Description
+Project Management: Create and share projects with others.
 
-My Basecamp 2 is a project management and collaboration web application built with ASP.NET Core MVC, PostgreSQL, and ASP.NET Identity. Users can register, log in, view projects, contribute to discussions, and work with project attachments.
+Discussions: Real-time messaging/discussion boards within projects.
 
-## Features
+Task Management: Add, and delete tasks within specific projects.
 
-Authentication: Users can register, log in, log out, and view their profile page.
+### Installation & Setup
 
-PostgreSQL Database: Project data, users, roles, project members, discussions, tasks, and attachments are stored persistently in PostgreSQL.
+To get the project running locally, follow these steps:
 
-Role-Based Access Control: Admin and Member roles are managed with ASP.NET Identity tables.
-
-Admin Dashboard: Admin users can view all registered users and promote or demote users between Admin and Member roles.
-
-Admin Permissions: Admin users can create, update, and delete projects, tasks, members, messages, and attachments.
-
-Member Permissions: Member users can read project data and contribute to discussions.
-
-Attachment Management: Admin users can upload files, save file records in PostgreSQL, delete files, preview supported files, and download attachments.
-
-Discussion Board: Project members can add messages inside project discussions.
-
-Task Management: Admin users can create, update, complete, and delete project tasks.
-
-Project Members: Admin users can add members to projects and manage project-level roles.
-
-Responsive Layout: The navbar keeps DASHBOARD on the left and account links on the right. Profile and main cards are centered on the page.
-
-## Main Routes
-
-Dashboard:
-```
-GET /Dashboard/Index
-```
-
-Admin user management:
-```
-GET /admin/users
-POST /admin/update-role/{id}
-```
-
-Project details:
-```
-GET /Project/Details/{id}
-```
-
-Attachment upload:
-```
-POST /Project/UploadAttachment
-```
-
-Attachment preview:
-```
-GET /Project/OpenAttachment/{id}
-```
-
-Attachment download:
-```
-GET /Project/DownloadAttachment/{id}
-```
-
-Attachment delete:
-```
-POST /Project/DeleteAttachment
-```
-
-## Installation
-
-1. Clone the repository.
+1. Clone the Repository
+Clone the project to your local machine and open the directory:
 
 ```
 git clone <repository-link>
 ```
 
-2. Open the solution.
+2. Open the Solution
+Open the "Basecamp-Backend.slnx".
 
-```
-Basecamp-Backend.slnx
-```
+3. Install Required Packages
+Ensure the following NuGet packages are installed for the backend to function correctly:
 
-3. Install the required NuGet packages.
-
-```
 Microsoft.AspNetCore.Identity.EntityFrameworkCore
-Microsoft.EntityFrameworkCore
-Microsoft.EntityFrameworkCore.Tools
-Npgsql.EntityFrameworkCore.PostgreSQL
-Npgsql.EntityFrameworkCore.PostgreSQL.Design
-```
 
-4. Configure PostgreSQL in `appsettings.json`.
+Microsoft.EntityFrameworkCore
+
+Microsoft.EntityFrameworkCore.Tools
+
+Npgsql.EntityFrameworkCore.PostgreSQL
+
+Npgsql.EntityFrameworkCore.PostgreSQL.Design
+
+4. Database Configuration
+Update the connection string in your appsettings.json file to match your local PostgreSQL credentials:
 
 ```
 "ConnectionStrings": {
-  "Default": "Host=localhost;Port=5432;Database=BaseCampDB;Username=postgres;Password=yourpassword;Include Error Detail=true"
-}
+    "Default": "Host=localhost;Port=5432;Database=BaseCampDB;Username=postgres;Password=yourpassword;Include Error Detail=true"
+},
 ```
 
-5. Apply database migrations.
+5. Database Migrations
+To create the necessary tables in your database:
+
+Go to Tools -> NuGet Package Manager -> Package Manager Console.
+
+In the terminal that opens, run the following command:
 
 ```
 Update-Database
 ```
 
-6. Run the application.
-
-```
-dotnet run
-```
-
-## Roles
-
-Admin:
-```
-Full CRUD permissions
-Manage users
-Promote users
-Demote users
-Upload attachments
-Delete attachments
-Delete messages
-Delete projects
-```
-
-Member:
-```
-Read project data
-View attachments
-Download attachments
-Contribute to discussions
-```
-
-## Team
+### The Core Team
 
 Anar Mirzayev
 

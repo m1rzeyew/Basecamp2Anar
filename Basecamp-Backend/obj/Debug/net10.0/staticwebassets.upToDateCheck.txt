@@ -1,0 +1,7 @@
+wwwroot\assets\css\style.css
+wwwroot\assets\js\script.js
+wwwroot\uploads\1259f28c-87b7-4e3e-b760-8f0a5896aa13.jpg
+wwwroot\uploads\830fea9a-6632-40f8-b2fd-baabd84430a3.jpg
+wwwroot\uploads\e4d3ebf1-881e-4db9-bb3c-8d61653a8512.mp4
+C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\wwwroot\assets\css\style.css
+C:\Users\Anar\Desktop\my_basecamp_1\Basecamp2Anar\Basecamp-Backend\wwwroot\assets\js\script.js
