@@ -1,5 +1,6 @@
 {
   "Version": 1,
+<<<<<<< HEAD
   "WorkspaceRootPath": "C:\\Users\\Anar\\Desktop\\sikimin basi\\Basecamp2Anar\\Basecamp-Backend\\",
   "Documents": [
     {
@@ -7,6 +8,10 @@
       "RelativeMoniker": "D:0:0:{35D34B75-08E2-A418-414D-86142741B3CF}|Basecamp-Backend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
+=======
+  "WorkspaceRootPath": "C:\\Users\\Anar\\Desktop\\basecamp 2\\Basecamp2Anar\\Basecamp-Backend\\",
+  "Documents": [],
+>>>>>>> main
   "DocumentGroupContainers": [
     {
       "Orientation": 0,

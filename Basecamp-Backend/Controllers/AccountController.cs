@@ -38,6 +38,8 @@ namespace Basecamp_Backend.Controllers
 
             var usersCount = await _userManager.Users.CountAsync();
 
+            var usersCount = await _userManager.Users.CountAsync();
+
             AppUser user = new AppUser()
             {
                 FullName = registerVM.FullName,

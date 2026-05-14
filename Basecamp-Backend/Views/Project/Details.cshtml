@@ -190,6 +190,7 @@
                                 <div class="attachment-item" id="att-@att.Id" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem;">
                                     <div style="display:flex; align-items:center; gap: 0.75rem;">
                                         <i class="ph @icon" style="font-size:1.5rem; color: var(--blue-primary);"></i>
+<<<<<<< HEAD
                                         <div>
                                             <div style="font-weight:600;">@att.FileName</div>
                                             <div style="display:flex; gap:0.75rem; margin-top:0.25rem;">
@@ -197,6 +198,12 @@
                                                 <a asp-controller="Project" asp-action="DownloadAttachment" asp-route-id="@att.Id" style="text-decoration:none; color: var(--blue-primary); font-weight:500;">Download</a>
                                             </div>
                                         </div>
+=======
+                                        <a href="@att.FilePath" download="@att.FileName"
+                                               style="text-decoration:none; color: inherit; font-weight:500;">
+                                            @att.FileName
+                                        </a>
+>>>>>>> main
                                     </div>
                                     @if (isAdmin)
                                     {
@@ -226,6 +233,136 @@
             element.style.display = 'none';
         }
 
+<<<<<<< HEAD
+=======
+        const formData = new FormData();
+        formData.append('taskId', taskId);
+
+        fetch('/Project/ToggleTask', {
+        method: 'POST',
+        body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+        if (data.success) {
+        const taskElement = document.getElementById(`task-${taskId}`);
+        const checkbox = taskElement.querySelector('.custom-checkbox');
+            
+        // Vizual olaraq dəyişikliyi tətbiq edirik
+        taskElement.classList.toggle('completed');
+        checkbox.innerHTML = data.isCompleted ? '<i class="ph ph-check-bold"></i>' : '';
+        } else {
+        alert("Xəta baş verdi!");
+        }
+        })
+        .catch(err => console.error("Error:", err));
+        }
+
+        // 3. Taskı Silmək
+        function deleteTask(taskId) {
+        if (!confirm("Bu tapşırığı silmək istəyirsiniz?")) return;
+
+        const formData = new FormData();
+        formData.append('taskId', taskId);
+
+        fetch('/Project/DeleteTask', {
+        method: 'POST',
+        body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+        if (data.success) {
+        document.getElementById(`task-${taskId}`).remove();
+        }
+        });
+        }
+
+        // Enter düyməsi ilə task əlavə etmək üçün
+        document.getElementById('taskInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+        addNewTask(@Model.Id);
+        }
+        });
+
+        // Fayl yükləmək
+        function uploadAttachment(projectId, input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const status = document.getElementById('uploadStatus');
+        status.style.display = 'block';
+
+        const formData = new FormData();
+        formData.append('projectId', projectId);
+        formData.append('file', file);
+
+        fetch('/Project/UploadAttachment', {
+        method: 'POST',
+        body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+        status.style.display = 'none';
+        if (data.success) {
+        const icons = {
+        '.pdf': 'ph-file-pdf',
+        '.png': 'ph-image', '.jpg': 'ph-image', '.jpeg': 'ph-image',
+        '.doc': 'ph-file-doc', '.docx': 'ph-file-doc',
+        '.xls': 'ph-file-xls', '.xlsx': 'ph-file-xls'
+        };
+        const icon = icons[data.fileType] || 'ph-file';
+
+        const html = `
+        <div class="attachment-item" id="att-${data.id}"
+        style="display:flex; align-items:center; justify-content:space-between;
+        padding: 0.75rem 1rem; border: 1px solid var(--border-color);
+        border-radius: 8px; margin-bottom: 0.5rem;">
+        <div style="display:flex; align-items:center; gap: 0.75rem;">
+        <i class="ph ${icon}" style="font-size:1.5rem; color: var(--blue-primary);"></i>
+        <a href="${data.filePath}" download="${data.fileName}"
+        style="text-decoration:none; color: inherit; font-weight:500;">
+        ${data.fileName}
+        </a>
+        </div>
+        <button onclick="deleteAttachment(${data.id})"
+        style="background:none; border:none; cursor:pointer; color:#e74c3c;">
+        <i class="ph ph-trash"></i>
+        </button>
+        </div>`;
+
+        document.getElementById('attachmentList').insertAdjacentHTML('afterbegin', html);
+        input.value = ''; // input-u sıfırla ki eyni faylı yenidən seçmək olsun
+        } else {
+        alert('Xəta: ' + data.message);
+        }
+        })
+        .catch(err => {
+        status.style.display = 'none';
+        console.error('Upload error:', err);
+        });
+        }
+
+        // Fayl silmək
+        function deleteAttachment(attachmentId) {
+        if (!confirm('Bu faylı silmək istəyirsiniz?')) return;
+
+        const formData = new FormData();
+        formData.append('attachmentId', attachmentId);
+
+        fetch('/Project/DeleteAttachment', {
+        method: 'POST',
+        body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+        if (data.success) {
+        document.getElementById(`att-${attachmentId}`).remove();
+        }
+        });
+        }
+
+        // Mesaj göndərmək
+>>>>>>> main
         function sendDiscussion(projectId) {
             const input = document.getElementById('discussionInput');
             const content = input.value.trim();
